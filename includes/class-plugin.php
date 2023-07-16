@@ -76,7 +76,7 @@ class Plugin {
 		// Apply `the_content` filters so as to have smart quotes and whatnot.
 		$status = apply_filters( 'the_content', $post->post_content );
 
-		if ( $jp_geo_loc ) {
+		if ( isset( $jp_geo_loc ) ) {
 			// Re-add the removed filter.
 			add_filter( 'the_content', array( $jp_geo_loc, 'the_content_microformat' ) );
 		}
