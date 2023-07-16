@@ -85,17 +85,17 @@ class Plugin {
 		if ( preg_match( '~<div class="u-in-reply-to h-cite">.*<a.+?href="' . home_url( '/' ) . '(articles|notes|likes)/(.+?)".*?>.+?</a>.*?</div>~', $status, $matches ) ) {
 			// Reply to a post of our own.
 			if ( 'articles' === $matches[1] ) {
-				$post = get_page_by_path( rtrim( $matches[2], '/' ), OBJECT, array( 'post' ) );
+				$parent = get_page_by_path( rtrim( $matches[2], '/' ), OBJECT, array( 'post' ) );
 			} elseif ( 'notes' === $matches[1] ) {
-				$post = get_page_by_path( rtrim( $matches[2], '/' ), OBJECT, array( 'indieblocks_note' ) );
+				$parent = get_page_by_path( rtrim( $matches[2], '/' ), OBJECT, array( 'indieblocks_note' ) );
 			} elseif ( 'likes' === $matches[1] ) {
-				$post = get_page_by_path( rtrim( $matches[2], '/' ), OBJECT, array( 'indieblocks_like' ) );
+				$parent = get_page_by_path( rtrim( $matches[2], '/' ), OBJECT, array( 'indieblocks_like' ) );
 			}
 			// @todo: Replace the above with `url_to_postid()`? Make it compatible with other permalink setups?
 
-			if ( ! empty( $post ) ) {
+			if ( ! empty( $parent ) ) {
 				// If we found a "parent" post, grab its corresponding Mastodon ID.
-				$toot_id = basename( get_post_meta( $post->ID, '_share_on_mastodon_url', true ) );
+				$toot_id = basename( get_post_meta( $parent->ID, '_share_on_mastodon_url', true ) );
 
 				if ( ! empty( $toot_id ) ) {
 					// We've tooted this parent note. Make Mastodon correctly
