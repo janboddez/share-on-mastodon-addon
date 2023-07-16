@@ -81,8 +81,11 @@ class Plugin {
 			add_filter( 'the_content', array( $jp_geo_loc, 'the_content_microformat' ) );
 		}
 
-		// Next, attempt to correectly thread replies-to-self.
-		if ( preg_match( '~<div class="u-in-reply-to h-cite">.*<a.+?href="(' . home_url( '/' ) . '.+?)".*?>.+?</a>.*?</div>~', $status, $matches ) ) {
+		// Next, attempt to correctly thread replies-to-self.
+		$regex = str_replace( array( '.', '~' ), array( '\.', '\~' ), esc_url_raw( home_url( '/' ) ) );
+		$regex = '~<div class="u-in-reply-to h-cite">.*?<a.+?href="(' . $regex . '.+?)".*?>.+?</a>.*?</div>~';
+
+		if ( preg_match( $regex, $status, $matches ) ) {
 			// Reply to a post of our own.
 			$parent_id = url_to_postid( $matches[1] );
 
