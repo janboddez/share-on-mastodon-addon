@@ -61,10 +61,6 @@ class Plugin {
 	 * @return array          Altered arguments.
 	 */
 	public function filter_args( $args, $post ) {
-		if ( has_category( 'rss-club', $post ) ) { // Don't ask. I know nothing.
-			$args['visibility'] = 'unlisted';
-		}
-
 		if ( 'indieblocks_note' !== $post->post_type ) {
 			// Do nothing.
 			return $args;
