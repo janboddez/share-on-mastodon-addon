@@ -84,7 +84,7 @@ class Plugin {
 		// Next, attempt to correectly thread replies-to-self.
 		if ( preg_match( '~<div class="u-in-reply-to h-cite">.*<a.+?href="(' . home_url( '/' ) . '.+?)".*?>.+?</a>.*?</div>~', $status, $matches ) ) {
 			// Reply to a post of our own.
-			$parent_id = url_to_postid( $matches[1], '/' );
+			$parent_id = url_to_postid( $matches[1] );
 
 			if ( ! empty( $parent_id ) ) {
 				// If we found a "parent" post, grab its corresponding Mastodon ID.
