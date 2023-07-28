@@ -113,6 +113,7 @@ class Plugin {
 		// The converter escapes existing "Markdown," and we occasionally use
 		// *syntax*, so try to retain that.
 		$status = str_replace( '\*', '*', $status );
+		$status = str_replace( '\_', '_', $status );
 		$status = trim( $status );
 
 		// Add tags as hashtags.
