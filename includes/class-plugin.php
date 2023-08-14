@@ -145,6 +145,9 @@ class Plugin {
 			$status .= "\n\n(" . get_permalink( $post ) . ')';
 		}
 
+		// Remove the `<` and `>` around auto-linked URLs (to prevent them from
+		// being stripped).
+		$status = preg_replace( '~<(https?://[^>]*)>~', "$1", $status );
 		// Strip any remaining HTML tags (but leave line breaks intact).
 		$status = sanitize_textarea_field( $status );
 
