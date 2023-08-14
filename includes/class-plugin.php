@@ -106,7 +106,7 @@ class Plugin {
 
 		// We want to convert a small number of HTML tags; anything else (like
 		// images) can probably be stripped instead.
-		$status = strip_tags( $status, '<p><br><a><em><i><strong><b><pre><code><blockquote><ul><ol><li><h1><h2><h3><h4><h5><h6>' );
+		$status = strip_tags( $status, '<p><br><a><em><strong><b><pre><code><blockquote><ul><ol><li><h1><h2><h3><h4><h5><h6>' );
 
 		// Now we can convert to Markdown.
 		$status = $this->converter->convert( $status );
