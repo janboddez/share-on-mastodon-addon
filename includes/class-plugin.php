@@ -116,6 +116,10 @@ class Plugin {
 		$status = str_replace( '\_', '_', $status );
 		$status = trim( $status );
 
+		if ( mb_strlen( $status, get_bloginfo( 'charset' ) ) > 400 ) {
+			$status = mb_substr( $status, 0, 400, get_bloginfo( 'charset' ) ) . '…';
+		}
+
 		// Add tags as hashtags.
 		$tags = get_the_tags( $post );
 
@@ -127,7 +131,7 @@ class Plugin {
 
 				if ( preg_match( '/\s+/', $tag_name ) ) {
 					// Try to "CamelCase" multi-word tags.
-					$tag_name = preg_replace( '/\s+/', ' ', $tag_name );
+					$tag_name = preg_replace( '~(\s|-)+~', ' ', $tag_name );
 					$tag_name = explode( ' ', $tag_name );
 					$tag_name = implode( '', array_map( 'ucfirst', $tag_name ) );
 				}
