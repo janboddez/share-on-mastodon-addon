@@ -61,107 +61,119 @@ class Plugin {
 	 * @return array          Altered arguments.
 	 */
 	public function filter_args( $args, $post ) {
-		if ( 'indieblocks_note' !== $post->post_type ) {
-			// Do nothing.
-			return $args;
+		if ( 'post' === $post->post_type ) {
+			// We keep articles "stock," but replace permalinks with a shortlink.
+			$status = $args['status'];
+
+			$shortlink = wp_get_shortlink( $post->ID );
+			if ( ! empty( $shortlink ) ) {
+				$status = str_replace( get_permalink( $post ), $shortlink, $status );
+			}
+
+			$args['status'] = $status;
 		}
 
-		// For notes, replace status with post content.
-		if ( class_exists( 'Jetpack_Geo_Location' ) ) {
-			// Prevent Jetpack from attaching location details.
-			$jp_geo_loc = \Jetpack_Geo_Location::init();
-			remove_filter( 'the_content', array( $jp_geo_loc, 'the_content_microformat' ) );
-		}
+		if ( 'indieblocks_note' === $post->post_type ) {
+			// For notes, replace status with post content.
+			if ( class_exists( 'Jetpack_Geo_Location' ) ) {
+				// Prevent Jetpack from attaching location details.
+				$jp_geo_loc = \Jetpack_Geo_Location::init();
+				remove_filter( 'the_content', array( $jp_geo_loc, 'the_content_microformat' ) );
+			}
 
-		// Apply `the_content` filters so as to have smart quotes and whatnot.
-		$status = apply_filters( 'the_content', $post->post_content );
+			// Apply `the_content` filters so as to have smart quotes and whatnot.
+			$status = apply_filters( 'the_content', $post->post_content );
 
-		if ( isset( $jp_geo_loc ) ) {
-			// Re-add the removed filter.
-			add_filter( 'the_content', array( $jp_geo_loc, 'the_content_microformat' ) );
-		}
+			if ( isset( $jp_geo_loc ) ) {
+				// Re-add the removed filter.
+				add_filter( 'the_content', array( $jp_geo_loc, 'the_content_microformat' ) );
+			}
 
-		// Next, attempt to correctly thread replies-to-self.
-		$regex = str_replace( array( '.', '~' ), array( '\.', '\~' ), esc_url_raw( home_url( '/' ) ) );
-		$regex = '~<div class="u-in-reply-to h-cite">.*?<a.+?href="(' . $regex . '.+?)".*?>.+?</a>.*?</div>~';
+			// Next, attempt to correctly thread replies-to-self.
+			$regex = str_replace( array( '.', '~' ), array( '\.', '\~' ), esc_url_raw( home_url( '/' ) ) );
+			$regex = '~<div class="u-in-reply-to h-cite">.*?<a.+?href="(' . $regex . '.+?)".*?>.+?</a>.*?</div>~';
 
-		if ( preg_match( $regex, $status, $matches ) ) {
-			// Reply to a post of our own.
-			$parent_id = url_to_postid( $matches[1] );
+			if ( preg_match( $regex, $status, $matches ) ) {
+				// Reply to a post of our own.
+				$parent_id = url_to_postid( $matches[1] );
 
-			if ( ! empty( $parent_id ) ) {
-				// If we found a "parent" post, grab its corresponding Mastodon ID.
-				$toot_id = basename( get_post_meta( $parent_id, '_share_on_mastodon_url', true ) );
+				if ( ! empty( $parent_id ) ) {
+					// If we found a "parent" post, grab its corresponding Mastodon ID.
+					$toot_id = basename( get_post_meta( $parent_id, '_share_on_mastodon_url', true ) );
 
-				if ( ! empty( $toot_id ) ) {
-					$args['in_reply_to_id'] = $toot_id;
+					if ( ! empty( $toot_id ) ) {
+						$args['in_reply_to_id'] = $toot_id;
 
-					// Also, remove introductory line from toot.
-					$status = trim( str_replace( $matches[0], '', $status ) );
+						// Also, remove introductory line from toot.
+						$status = trim( str_replace( $matches[0], '', $status ) );
+					}
+				} else {
+					\Share_On_Mastodon\debug_log( '[Share On Mastodon] Could not convert URL to post ID.' );
 				}
+			}
+
+			// We want to convert a small number of HTML tags; anything else (like
+			// images) can probably be stripped instead.
+			$status = strip_tags( $status, '<p><br><a><em><strong><b><pre><code><blockquote><ul><ol><li><h1><h2><h3><h4><h5><h6>' );
+
+			// Now we can convert to Markdown.
+			$status = $this->converter->convert( $status );
+			// The converter escapes existing "Markdown," and we occasionally use
+			// *syntax*, so try to retain that.
+			$status = str_replace( '\*', '*', $status );
+			$status = str_replace( '\_', '_', $status );
+			// Remove the `<` and `>` around auto-linked URLs (to prevent them from
+			// being stripped).
+			$status = preg_replace( '~<(https?://[^>]*)>~', "$1", $status );
+			$status = trim( $status );
+
+			$hashtags = '';
+
+			// Add tags as hashtags.
+			$tags = get_the_tags( $post );
+
+			if ( $tags && ! is_wp_error( $tags ) ) {
+				foreach ( $tags as $tag ) {
+					$tag_name = $tag->name;
+
+					if ( preg_match( '/\s+/', $tag_name ) ) {
+						// Try to "CamelCase" multi-word tags.
+						$tag_name = preg_replace( '~(\s|-)+~', ' ', $tag_name );
+						$tag_name = explode( ' ', $tag_name );
+						$tag_name = implode( '', array_map( 'ucfirst', $tag_name ) );
+					}
+
+					$hashtags .= '#' . $tag_name . ' ';
+				}
+			}
+
+			$hashtags = "\n\n" . trim( $hashtags );
+
+			// Attach shortlink.
+			$shortlink = wp_get_shortlink( $post->ID );
+
+			if ( ! empty( $shortlink ) ) {
+				$permalink = "\n\n(" . $shortlink . ')';
 			} else {
-				\Share_On_Mastodon\debug_log( '[Share On Mastodon] Could not convert URL to post ID.' );
+				// Use a "regular" permalink instead.
+				$permalink = "\n\n(" . get_permalink( $post ) . ')';
 			}
+
+			// Strip any remaining HTML tags (but leave line breaks intact).
+			$status = sanitize_textarea_field( $status );
+			// Prevent double-encoded entities.
+			$status = html_entity_decode( $status, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) );
+			// Remove superfluous line breaks.
+			$status = preg_replace( '~\R\R+~', "\n\n", $status );
+
+			// *All* links are considered 23 characters in length. Also, 490
+			// rather than 500 because there *might* be shorter links in the
+			// body text and so on.
+			$status  = mb_substr( $status, 0, 490 - mb_strlen( $hashtags ) - 27, get_bloginfo( 'charset' ) ) . '…';
+			$status .= $hashtags . $permalink;
+
+			$args['status'] = $status;
 		}
-
-		// We want to convert a small number of HTML tags; anything else (like
-		// images) can probably be stripped instead.
-		$status = strip_tags( $status, '<p><br><a><em><strong><b><pre><code><blockquote><ul><ol><li><h1><h2><h3><h4><h5><h6>' );
-
-		// Now we can convert to Markdown.
-		$status = $this->converter->convert( $status );
-		// The converter escapes existing "Markdown," and we occasionally use
-		// *syntax*, so try to retain that.
-		$status = str_replace( '\*', '*', $status );
-		$status = str_replace( '\_', '_', $status );
-		$status = trim( $status );
-
-		if ( mb_strlen( $status, get_bloginfo( 'charset' ) ) > 400 ) {
-			$status = mb_substr( $status, 0, 400, get_bloginfo( 'charset' ) ) . '…';
-		}
-
-		// Add tags as hashtags.
-		$tags = get_the_tags( $post );
-
-		if ( $tags && ! is_wp_error( $tags ) ) {
-			$status .= "\n\n";
-
-			foreach ( $tags as $tag ) {
-				$tag_name = $tag->name;
-
-				if ( preg_match( '/\s+/', $tag_name ) ) {
-					// Try to "CamelCase" multi-word tags.
-					$tag_name = preg_replace( '~(\s|-)+~', ' ', $tag_name );
-					$tag_name = explode( ' ', $tag_name );
-					$tag_name = implode( '', array_map( 'ucfirst', $tag_name ) );
-				}
-
-				$status .= '#' . $tag_name . ' ';
-			}
-		}
-
-		// Attach shortlink.
-		$short_url = get_post_meta( $post->ID, 'short_url', true );
-
-		if ( ! empty( $short_url ) ) {
-			$status .= "\n\n(" . $short_url . ')';
-		} else {
-			// Use a "regular" permalink instead.
-			$status .= "\n\n(" . get_permalink( $post ) . ')';
-		}
-
-		// Remove the `<` and `>` around auto-linked URLs (to prevent them from
-		// being stripped).
-		$status = preg_replace( '~<(https?://[^>]*)>~', "$1", $status );
-		// Strip any remaining HTML tags (but leave line breaks intact).
-		$status = sanitize_textarea_field( $status );
-
-		// Prevent double-encoded entities.
-		$status = html_entity_decode( $status, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) );
-		// Remove superfluous line breaks.
-		$status = preg_replace( '~\n\n+~', "\n\n", $status );
-
-		$args['status'] = $status;
 
 		return $args;
 	}
