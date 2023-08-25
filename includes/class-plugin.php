@@ -48,6 +48,8 @@ class Plugin {
 			$this->converter->getConfig()->setOption( 'hard_break', true );
 			// Pound signs rather than underlines, for `h2` elements.
 			$this->converter->getConfig()->setOption( 'header_style', HeaderConverter::STYLE_ATX );
+			// PHP's `strip_tags` adds line breaks, as does WP's `wp_strip_all_tags()`.
+			$this->converter->getConfig()->setOption( 'strip_tags', true );
 		}
 
 		add_filter( 'share_on_mastodon_toot_args', array( $this, 'filter_args' ), 100, 2 );
@@ -115,6 +117,7 @@ class Plugin {
 			// We want to convert a small number of HTML tags; anything else (like
 			// images) can probably be stripped instead.
 			$status = strip_tags( $status, '<p><br><a><em><strong><b><pre><code><blockquote><ul><ol><li><h1><h2><h3><h4><h5><h6>' );
+			$status = preg_replace( '~<pre[^>]*"><code[^>]*>(.*?)</code></pre>~s', "<pre>$1</pre>", $status );
 
 			// Now we can convert to Markdown.
 			$status = $this->converter->convert( $status );
@@ -159,8 +162,6 @@ class Plugin {
 				$permalink = "\n\n(" . get_permalink( $post ) . ')';
 			}
 
-			// Strip any remaining HTML tags (but leave line breaks intact).
-			$status = sanitize_textarea_field( $status );
 			// Prevent double-encoded entities.
 			$status = html_entity_decode( $status, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) );
 			// Remove superfluous line breaks.
@@ -169,8 +170,18 @@ class Plugin {
 			// *All* links are considered 23 characters in length. Also, 490
 			// rather than 500 because there *might* be shorter links in the
 			// body text and so on.
-			$status  = mb_substr( $status, 0, 490 - mb_strlen( $hashtags ) - 27, get_bloginfo( 'charset' ) ) . '…';
+			$max_length  = 490 - mb_strlen( $hashtags, get_bloginfo( 'charset' ) ) - 27; // `27`, because of the parentheses and line breaks.
+			$orig_length = mb_strlen( $status, get_bloginfo( 'charset' ) );
+			$status      = mb_substr( $status, 0, $max_length, get_bloginfo( 'charset' ) );
+
+			if ( $orig_length > $max_length ) {
+				// Append an ellipsis only if status was shortened.
+				$status .= '…';
+			}
+
 			$status .= $hashtags . $permalink;
+
+			error_log( $status );
 
 			$args['status'] = $status;
 		}
