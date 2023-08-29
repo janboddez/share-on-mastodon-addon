@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name: Tweak Share on Mastodon for notes
- * Description: Convert (IndieBlocks) notes to Markdown before sharing them on Mastodon, and attempt to thread replies.
+ * Plugin Name: Share on Mastodon Add-On Plugin
+ * Description: Bundles a number of Share on Mastodon "improvements."
  * Author:      Jan Boddez
  * Author URI:  https://jan.boddez.net/
  * License: GNU General Public License v3
