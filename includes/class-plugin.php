@@ -84,7 +84,7 @@ class Plugin {
 			}
 
 			if ( class_exists( '\\ActivityPub\\Hashtag' ) ) {
-				$hashtag = remove_filter( 'the_content', array( \ActivityPub\Hashtag::class, 'the_content' ), 10, 2 );
+				$hashtag = remove_filter( 'the_content', array( \ActivityPub\Hashtag::class, 'the_content' ) );
 			}
 
 			// Apply `the_content` filters so as to have smart quotes and whatnot.
