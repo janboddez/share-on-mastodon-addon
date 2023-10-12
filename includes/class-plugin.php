@@ -77,18 +77,27 @@ class Plugin {
 
 		if ( 'indieblocks_note' === $post->post_type ) {
 			// For notes, replace status with post content.
-			if ( class_exists( 'Jetpack_Geo_Location' ) ) {
+			if ( class_exists( '\\Jetpack_Geo_Location' ) ) {
 				// Prevent Jetpack from attaching location details.
 				$jp_geo_loc = \Jetpack_Geo_Location::init();
 				remove_filter( 'the_content', array( $jp_geo_loc, 'the_content_microformat' ) );
 			}
 
+			if ( class_exists( '\\ActivityPub\\Hashtag' ) ) {
+				$hashtag = remove_filter( 'the_content', array( \ActivityPub\Hashtag::class, 'the_content' ), 10, 2 );
+			}
+
 			// Apply `the_content` filters so as to have smart quotes and whatnot.
 			$status = apply_filters( 'the_content', $post->post_content );
 
-			if ( isset( $jp_geo_loc ) ) {
+			if ( ! empty( $jp_geo_loc ) ) {
 				// Re-add the removed filter.
 				add_filter( 'the_content', array( $jp_geo_loc, 'the_content_microformat' ) );
+			}
+
+			if ( ! empty( $hashtag ) ) [
+				// Re-add the removed filter.
+				add_filter( 'the_content', array( \ActivityPub\Hashtag::class, 'the_content' ), 10, 2 );
 			}
 
 			// Next, attempt to correctly thread replies-to-self.
