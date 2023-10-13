@@ -95,7 +95,7 @@ class Plugin {
 				add_filter( 'the_content', array( $jp_geo_loc, 'the_content_microformat' ) );
 			}
 
-			if ( ! empty( $hashtag ) ) [
+			if ( ! empty( $hashtag ) ) {
 				// Re-add the removed filter.
 				add_filter( 'the_content', array( \ActivityPub\Hashtag::class, 'the_content' ), 10, 2 );
 			}
@@ -126,7 +126,7 @@ class Plugin {
 			// We want to convert a small number of HTML tags; anything else (like
 			// images) can probably be stripped instead.
 			$status = strip_tags( $status, '<p><br><a><em><strong><b><pre><code><blockquote><ul><ol><li><h1><h2><h3><h4><h5><h6>' );
-			$status = preg_replace( '~<pre[^>]*"><code[^>]*>(.*?)</code></pre>~s', "<pre>$1</pre>", $status );
+			$status = preg_replace( '~<pre[^>]*"><code[^>]*>(.*?)</code></pre>~s', "<pre>$1</pre>", $status ); //phpcs:ignore Squiz.Strings.DoubleQuoteUsage.NotRequired
 
 			// Now we can convert to Markdown.
 			$status = $this->converter->convert( $status );
@@ -136,7 +136,7 @@ class Plugin {
 			$status = str_replace( '\_', '_', $status );
 			// Remove the `<` and `>` around auto-linked URLs (to prevent them from
 			// being stripped).
-			$status = preg_replace( '~<(https?://[^>]*)>~', "$1", $status );
+			$status = preg_replace( '~<(https?://[^>]*)>~', "$1", $status ); // phpcs:ignore Squiz.Strings.DoubleQuoteUsage.NotRequired
 			$status = trim( $status );
 
 			$hashtags = '';
@@ -159,7 +159,7 @@ class Plugin {
 				}
 			}
 
-			$hashtags = "\n\n" . trim( $hashtags );
+			$hashtags = ! empty( $hashtags ) ? "\n\n" . trim( $hashtags ) : '';
 
 			// Attach shortlink.
 			$shortlink = wp_get_shortlink( $post->ID );
@@ -189,8 +189,6 @@ class Plugin {
 			}
 
 			$status .= $hashtags . $permalink;
-
-			error_log( $status );
 
 			$args['status'] = $status;
 		}
