@@ -83,8 +83,8 @@ class Plugin {
 				remove_filter( 'the_content', array( $jp_geo_loc, 'the_content_microformat' ) );
 			}
 
-			if ( class_exists( '\\ActivityPub\\Hashtag' ) ) {
-				$hashtag = remove_filter( 'the_content', array( \ActivityPub\Hashtag::class, 'the_content' ) );
+			if ( class_exists( '\\Activitypub\\Hashtag' ) ) {
+				$hashtag = remove_filter( 'the_content', array( \Activitypub\Hashtag::class, 'the_content' ) );
 			}
 
 			// Apply `the_content` filters so as to have smart quotes and whatnot.
@@ -97,7 +97,7 @@ class Plugin {
 
 			if ( ! empty( $hashtag ) ) {
 				// Re-add the removed filter.
-				add_filter( 'the_content', array( \ActivityPub\Hashtag::class, 'the_content' ), 10, 2 );
+				add_filter( 'the_content', array( \Activitypub\Hashtag::class, 'the_content' ), 10, 2 );
 			}
 
 			// Next, attempt to correctly thread replies-to-self.
