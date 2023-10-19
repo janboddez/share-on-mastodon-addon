@@ -134,6 +134,7 @@ class Plugin {
 			// *syntax*, so try to retain that.
 			$status = str_replace( '\*', '*', $status );
 			$status = str_replace( '\_', '_', $status );
+			$status = str_replace( array( '\[', '\]' ), array( '[', ']' ), $status );
 			// Remove the `<` and `>` around auto-linked URLs (to prevent them from
 			// being stripped).
 			$status = preg_replace( '~<(https?://[^>]*)>~', "$1", $status ); // phpcs:ignore Squiz.Strings.DoubleQuoteUsage.NotRequired
