@@ -123,21 +123,22 @@ class Plugin {
 				}
 			}
 
-			// We want to convert a small number of HTML tags; anything else (like
-			// images) can probably be stripped instead.
+			// We want to convert only a small number of HTML tags; anything
+			// else (like images) can probably be stripped instead.
 			$status = strip_tags( $status, '<p><br><a><em><strong><b><pre><code><blockquote><ul><ol><li><h1><h2><h3><h4><h5><h6>' );
 			$status = preg_replace( '~<pre[^>]*"><code[^>]*>(.*?)</code></pre>~s', "<pre>$1</pre>", $status ); //phpcs:ignore Squiz.Strings.DoubleQuoteUsage.NotRequired
 
-			// Now we can convert to Markdown.
+			// *Now* we can convert to Markdown.
 			$status = $this->converter->convert( $status );
 			// The converter escapes existing "Markdown," and we occasionally use
-			// *syntax*, so try to retain that.
-			$status = str_replace( '\*', '*', $status );
-			$status = str_replace( '\_', '_', $status );
+			// *syntax* (and so on), so try to retain that.
+			$status = str_replace( array( '\*', '\_' ), array( '*', '_' ), $status );
 			$status = str_replace( array( '\[', '\]' ), array( '[', ']' ), $status );
 			// Remove the `<` and `>` around auto-linked URLs (to prevent them from
 			// being stripped).
 			$status = preg_replace( '~<(https?://[^>]*)>~', "$1", $status ); // phpcs:ignore Squiz.Strings.DoubleQuoteUsage.NotRequired
+			// Replace footnote "fragment" links.
+			$status = preg_replace( '~(\[\d+?\])\(#fn-\d+?\)~', "$1", $status ); // phpcs:ignore Squiz.Strings.DoubleQuoteUsage.NotRequired
 			$status = trim( $status );
 
 			$hashtags = '';
