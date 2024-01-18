@@ -53,6 +53,8 @@ class Plugin {
 		}
 
 		add_filter( 'share_on_mastodon_toot_args', array( $this, 'filter_args' ), 100, 2 );
+
+		ActivityPub::register();
 	}
 
 	/**

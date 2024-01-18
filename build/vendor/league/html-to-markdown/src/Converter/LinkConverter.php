@@ -6,6 +6,7 @@ namespace Share_On_Mastodon\League\HTMLToMarkdown\Converter;
 use Share_On_Mastodon\League\HTMLToMarkdown\Configuration;
 use Share_On_Mastodon\League\HTMLToMarkdown\ConfigurationAwareInterface;
 use Share_On_Mastodon\League\HTMLToMarkdown\ElementInterface;
+/** @internal */
 class LinkConverter implements ConverterInterface, ConfigurationAwareInterface
 {
     /** @var Configuration */
@@ -59,6 +60,6 @@ class LinkConverter implements ConverterInterface, ConfigurationAwareInterface
     }
     private function shouldStrip() : bool
     {
-        return $this->config->getOption('strip_placeholder_links') ?? \false;
+        return \boolval($this->config->getOption('strip_placeholder_links') ?? \false);
     }
 }

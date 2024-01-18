@@ -20,6 +20,7 @@ use Share_On_Mastodon\League\HTMLToMarkdown\Converter\ListItemConverter;
 use Share_On_Mastodon\League\HTMLToMarkdown\Converter\ParagraphConverter;
 use Share_On_Mastodon\League\HTMLToMarkdown\Converter\PreformattedConverter;
 use Share_On_Mastodon\League\HTMLToMarkdown\Converter\TextConverter;
+/** @internal */
 final class Environment
 {
     /** @var Configuration */

@@ -3,10 +3,12 @@
 declare (strict_types=1);
 namespace Share_On_Mastodon\League\HTMLToMarkdown\Converter;
 
+use Share_On_Mastodon\League\HTMLToMarkdown\Coerce;
 use Share_On_Mastodon\League\HTMLToMarkdown\Configuration;
 use Share_On_Mastodon\League\HTMLToMarkdown\ConfigurationAwareInterface;
 use Share_On_Mastodon\League\HTMLToMarkdown\ElementInterface;
 use Share_On_Mastodon\League\HTMLToMarkdown\PreConverterInterface;
+/** @internal */
 class TableConverter implements ConverterInterface, PreConverterInterface, ConfigurationAwareInterface
 {
     /** @var Configuration */
@@ -68,7 +70,7 @@ class TableConverter implements ConverterInterface, PreConverterInterface, Confi
                     $this->columnAlignments[] = self::$alignments[$align] ?? '---';
                 }
                 $value = \str_replace("\n", ' ', $value);
-                $value = \str_replace('|', $this->config->getOption('table_pipe_escape') ?? '\\|', $value);
+                $value = \str_replace('|', Coerce::toString($this->config->getOption('table_pipe_escape') ?? '\\|'), $value);
                 return '| ' . \trim($value) . ' ';
             case 'thead':
             case 'tbody':

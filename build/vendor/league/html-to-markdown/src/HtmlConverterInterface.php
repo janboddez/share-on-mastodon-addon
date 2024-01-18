@@ -11,6 +11,7 @@ namespace Share_On_Mastodon\League\HTMLToMarkdown;
  * @link https://github.com/thephpleague/html-to-markdown/ Latest version on GitHub.
  *
  * @license http://www.opensource.org/licenses/mit-license.php MIT
+ * @internal
  */
 interface HtmlConverterInterface
 {

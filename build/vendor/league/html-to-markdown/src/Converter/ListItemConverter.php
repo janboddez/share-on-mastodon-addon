@@ -3,9 +3,11 @@
 declare (strict_types=1);
 namespace Share_On_Mastodon\League\HTMLToMarkdown\Converter;
 
+use Share_On_Mastodon\League\HTMLToMarkdown\Coerce;
 use Share_On_Mastodon\League\HTMLToMarkdown\Configuration;
 use Share_On_Mastodon\League\HTMLToMarkdown\ConfigurationAwareInterface;
 use Share_On_Mastodon\League\HTMLToMarkdown\ElementInterface;
+/** @internal */
 class ListItemConverter implements ConverterInterface, ConfigurationAwareInterface
 {
     /** @var Configuration */
@@ -29,8 +31,8 @@ class ListItemConverter implements ConverterInterface, ConfigurationAwareInterfa
             $prefix = "\n";
         }
         if ($listType === 'ul') {
-            $listItemStyle = $this->config->getOption('list_item_style', '-');
-            $listItemStyleAlternate = $this->config->getOption('list_item_style_alternate');
+            $listItemStyle = Coerce::toString($this->config->getOption('list_item_style', '-'));
+            $listItemStyleAlternate = Coerce::toString($this->config->getOption('list_item_style_alternate', ''));
             if (!isset($this->listItemStyle)) {
                 $this->listItemStyle = $listItemStyleAlternate ?: $listItemStyle;
             }

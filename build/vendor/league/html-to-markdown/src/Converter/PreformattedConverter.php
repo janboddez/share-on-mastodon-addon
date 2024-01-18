@@ -4,12 +4,15 @@ declare (strict_types=1);
 namespace Share_On_Mastodon\League\HTMLToMarkdown\Converter;
 
 use Share_On_Mastodon\League\HTMLToMarkdown\ElementInterface;
+/** @internal */
 class PreformattedConverter implements ConverterInterface
 {
     public function convert(ElementInterface $element) : string
     {
         $preContent = \html_entity_decode($element->getChildrenAsString());
-        $preContent = \str_replace(['<pre>', '</pre>'], '', $preContent);
+        $preContent = \preg_replace('/<pre\\b[^>]*>/', '', $preContent);
+        \assert($preContent !== null);
+        $preContent = \str_replace('</pre>', '', $preContent);
         /*
          * Checking for the code tag.
          * Usually pre tags are used along with code tags. This conditional will check for already converted code tags,

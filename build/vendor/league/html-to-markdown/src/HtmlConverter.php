@@ -12,6 +12,7 @@ namespace Share_On_Mastodon\League\HTMLToMarkdown;
  * @link https://github.com/thephpleague/html-to-markdown/ Latest version on GitHub.
  *
  * @license http://www.opensource.org/licenses/mit-license.php MIT
+ * @internal
  */
 class HtmlConverter implements HtmlConverterInterface
 {
@@ -193,7 +194,7 @@ class HtmlConverter implements HtmlConverterInterface
     {
         $tag = $element->getTagName();
         // Strip nodes named in remove_nodes
-        $tagsToRemove = \explode(' ', $this->getConfig()->getOption('remove_nodes') ?? '');
+        $tagsToRemove = \explode(' ', Coerce::toString($this->getConfig()->getOption('remove_nodes') ?? ''));
         if (\in_array($tag, $tagsToRemove, \true)) {
             return '';
         }

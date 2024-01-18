@@ -1,5 +1,6 @@
 {
     "require": {
+        "deruli/html-minifier": "^0.5",
         "league/html-to-markdown": "^5.1"
     },
     "autoload": {

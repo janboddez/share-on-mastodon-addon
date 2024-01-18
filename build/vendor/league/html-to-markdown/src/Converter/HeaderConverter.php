@@ -6,6 +6,7 @@ namespace Share_On_Mastodon\League\HTMLToMarkdown\Converter;
 use Share_On_Mastodon\League\HTMLToMarkdown\Configuration;
 use Share_On_Mastodon\League\HTMLToMarkdown\ConfigurationAwareInterface;
 use Share_On_Mastodon\League\HTMLToMarkdown\ElementInterface;
+/** @internal */
 class HeaderConverter implements ConverterInterface, ConfigurationAwareInterface
 {
     public const STYLE_ATX = 'atx';

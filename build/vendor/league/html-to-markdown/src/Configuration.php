@@ -3,6 +3,7 @@
 declare (strict_types=1);
 namespace Share_On_Mastodon\League\HTMLToMarkdown;
 
+/** @internal */
 class Configuration
 {
     /** @var array<string, mixed> */

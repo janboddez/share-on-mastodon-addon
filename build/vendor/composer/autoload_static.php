@@ -4,16 +4,21 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitfb1f27827857c2fb43d429ab3a411384
+class ComposerStaticInitb911793090f13360cff89dc7a43a0dc5
 {
     public static $prefixLengthsPsr4 = array (
         'S' => 
         array (
+            'Share_On_Mastodon\\zz\\' => 21,
             'Share_On_Mastodon\\League\\HTMLToMarkdown\\' => 40,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
+        'Share_On_Mastodon\\zz\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/deruli/html-minifier/src/zz',
+        ),
         'Share_On_Mastodon\\League\\HTMLToMarkdown\\' => 
         array (
             0 => __DIR__ . '/..' . '/league/html-to-markdown/src',
@@ -22,6 +27,7 @@ class ComposerStaticInitfb1f27827857c2fb43d429ab3a411384
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Share_On_Mastodon\\League\\HTMLToMarkdown\\Coerce' => __DIR__ . '/..' . '/league/html-to-markdown/src/Coerce.php',
         'Share_On_Mastodon\\League\\HTMLToMarkdown\\Configuration' => __DIR__ . '/..' . '/league/html-to-markdown/src/Configuration.php',
         'Share_On_Mastodon\\League\\HTMLToMarkdown\\ConfigurationAwareInterface' => __DIR__ . '/..' . '/league/html-to-markdown/src/ConfigurationAwareInterface.php',
         'Share_On_Mastodon\\League\\HTMLToMarkdown\\Converter\\BlockquoteConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/BlockquoteConverter.php',
@@ -48,15 +54,21 @@ class ComposerStaticInitfb1f27827857c2fb43d429ab3a411384
         'Share_On_Mastodon\\League\\HTMLToMarkdown\\HtmlConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/HtmlConverter.php',
         'Share_On_Mastodon\\League\\HTMLToMarkdown\\HtmlConverterInterface' => __DIR__ . '/..' . '/league/html-to-markdown/src/HtmlConverterInterface.php',
         'Share_On_Mastodon\\League\\HTMLToMarkdown\\PreConverterInterface' => __DIR__ . '/..' . '/league/html-to-markdown/src/PreConverterInterface.php',
+        'Share_On_Mastodon\\Notes\\ActivityPub' => __DIR__ . '/../..' . '/../includes/class-activitypub.php',
         'Share_On_Mastodon\\Notes\\Plugin' => __DIR__ . '/../..' . '/../includes/class-plugin.php',
+        'Share_On_Mastodon\\zz\\Html\\HTMLMinify' => __DIR__ . '/..' . '/deruli/html-minifier/src/zz/Html/HTMLMinify.php',
+        'Share_On_Mastodon\\zz\\Html\\HTMLNames' => __DIR__ . '/..' . '/deruli/html-minifier/src/zz/Html/HTMLNames.php',
+        'Share_On_Mastodon\\zz\\Html\\HTMLToken' => __DIR__ . '/..' . '/deruli/html-minifier/src/zz/Html/HTMLToken.php',
+        'Share_On_Mastodon\\zz\\Html\\HTMLTokenizer' => __DIR__ . '/..' . '/deruli/html-minifier/src/zz/Html/HTMLTokenizer.php',
+        'Share_On_Mastodon\\zz\\Html\\SegmentedString' => __DIR__ . '/..' . '/deruli/html-minifier/src/zz/Html/SegmentedString.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitfb1f27827857c2fb43d429ab3a411384::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitfb1f27827857c2fb43d429ab3a411384::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitfb1f27827857c2fb43d429ab3a411384::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitb911793090f13360cff89dc7a43a0dc5::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitb911793090f13360cff89dc7a43a0dc5::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitb911793090f13360cff89dc7a43a0dc5::$classMap;
 
         }, null, ClassLoader::class);
     }
