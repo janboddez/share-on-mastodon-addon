@@ -70,28 +70,36 @@ class ActivityPub {
 			),
 		);
 
-		$shortlink = wp_get_shortlink( $obj->ID );
-		if ( ! empty( $shortlink ) ) {
-			$permalink = $shortlink;
-		} else {
-			$permalink = get_permalink( $obj );
-		}
+		if ( $obj instanceof \WP_Post ) {
+			// We're dealing with a post.
+			$content = apply_filters( 'the_content', $obj->post_content );
 
-		$content = apply_filters( 'the_content', $obj->post_content );
+			$shortlink = wp_get_shortlink( $obj->ID );
+			if ( ! empty( $shortlink ) ) {
+				$permalink = $shortlink;
+			} else {
+				$permalink = get_permalink( $obj );
+			}
 
-		if ( in_array( $obj->post_type, array( 'post', 'page' ), true ) ) {
-			// Strip tags and shorten.
-			$content = wp_trim_words( $content, 25, ' […]' ); // Also strips all HTML.
+			if ( in_array( $obj->post_type, array( 'post', 'page' ), true ) ) {
+				// Strip tags and shorten.
+				$content = wp_trim_words( $content, 25, ' […]' ); // Also strips all HTML.
 
-			// Prepend the title.
-			$content = '<p><strong>' . get_the_title( $obj ) . '</strong></p><p>' . $content . '</p>';
+				// Prepend the title.
+				$content = '<p><strong>' . get_the_title( $obj ) . '</strong></p><p>' . $content . '</p>';
 
-			// Append a permalink.
-			$content .= '<p>(<a href="' . esc_url( $permalink ) . '">' . esc_html( $permalink ) . '</a>)</p>';
+				// Append a permalink.
+				$content .= '<p>(<a href="' . esc_url( $permalink ) . '">' . esc_html( $permalink ) . '</a>)</p>';
+			} else {
+				// Append only a permalink.
+				$content .= '<p>(<a href="' . esc_url( $permalink ) . '">' . esc_html( $permalink ) . '</a>)</p>';
+			}
+		} elseif ( $obj instanceof \WP_Comment ) {
+			$content = apply_filters( 'comment_text', $obj->comment_content, $obj );
 
-		} else {
 			// Append only a permalink.
-			$content .= '<p>(<a href="' . esc_url( $permalink ) . '">' . esc_html( $permalink ) . '</a>)</p>';
+			$permalink = get_comment_link( $obj );
+			$content  .= '<p>(<a href="' . esc_url( $permalink ) . '">' . esc_html( $permalink ) . '</a>)</p>';
 		}
 
 		$content = wp_kses( $content, $allowed_tags );
